@@ -22,8 +22,8 @@ element (as returned by `org-element-parse-buffer'.)"
   "Compile an alist mapping headlines (which should be the names of
 the various services you use) to username and password data.
 
-Return a function that returns username-password data, given the
-name of a service."
+Return the interactive command used for copying a username or
+password to the clipboard."
   (let* ((headline-tree (org-element-parse-buffer 'headline))
          (service-data (org-element-map headline-tree 'headline
                 (lambda (element)
@@ -32,6 +32,8 @@ name of a service."
                                       :USERNAME
                                       :PASSWORD)))))
     (lambda (service-name field)
+      "Interactive command for copying a username or password to the
+clipboard."
       (interactive
        (let ((names (mapcar #'car service-data)))
          (list (completing-read "Service: " names nil t)
