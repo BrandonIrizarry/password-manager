@@ -44,6 +44,11 @@ clipboard."
                           ("password" password))))
           (gui-set-selection 'CLIPBOARD response))))))
 
+(defun pm-lookup ()
+  "The driver for looking up usernames and passwords."
+  (interactive)
+  (call-interactively (pm-compile-data)))
+
 (provide 'password-manager)
 
 ;; Local Variables:
