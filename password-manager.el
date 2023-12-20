@@ -47,7 +47,9 @@ clipboard."
 (defun pm-lookup ()
   "The driver for looking up usernames and passwords."
   (interactive)
-  (call-interactively (pm-compile-data)))
+  (let ((result (call-interactively (pm-compile-data))))
+    (or result
+        (user-error "Drawer property missing"))))
 
 (provide 'password-manager)
 
