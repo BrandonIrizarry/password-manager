@@ -1,1 +1,5 @@
 /.emacs-backups/
+/*.org
+!README.org
+*~
+*.gpg
