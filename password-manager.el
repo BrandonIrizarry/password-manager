@@ -10,12 +10,24 @@
 ;; and password you have on file for it, without having to, for
 ;; example, manually highlight and copy the data.
 
-(defun pm--extract-fields (element &rest fieldnames)
+(defun pm--user-property-p (key)
+  "Return true if keyword symbol KEY is a user-defined drawer
+property."
+  (let ((raw-key-name (substring (symbol-name key) 1)))
+    (string= raw-key-name
+             (upcase raw-key-name))))
+
+(defun pm--extract-fields (properties)
   "Extract fields given by FIELDNAMES from ELEMENT, an Org
 element (as returned by `org-element-parse-buffer'.)"
-  (mapcar (lambda (property)
-            (plist-get (cadr element) property))
-          fieldnames))
+  (let ((user-keys (seq-filter #'pm--user-property-p
+                               (seq-filter #'keywordp properties)))
+        (headline (plist-get properties :raw-value)))
+    (cons headline
+          ;; Keep the relevant "slice" of the plist for later use.
+          (apply #'append (mapcar (lambda (property)
+                                    (list property (plist-get properties property)))
+                                  user-keys)))))
 
 
 (defun pm-compile-data ()
