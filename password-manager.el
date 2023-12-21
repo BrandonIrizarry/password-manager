@@ -10,6 +10,7 @@
 ;; and password you have on file for it, without having to, for
 ;; example, manually highlight and copy the data.
 
+(require 'org-element)
 (defun pm--derive-raw-name (key)
   "Get a simplified string representation of a keyword symbol.
 
