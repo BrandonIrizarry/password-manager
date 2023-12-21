@@ -1,6 +1,8 @@
+;;; password-manager.el --- Manage usernames and passwords using Org Mode
+
 ;; -*- lexical-binding: t; -*-
 
-;;; Commentary
+;;; Commentary:
 ;;
 ;; The goal is to (more or less) implement a replacement (but not
 ;; necessarily a workalike) for the 'pass' program in pure Org Mode.
@@ -11,18 +13,25 @@
 ;; example, manually highlight and copy the data.
 
 (require 'org-element)
+
+;;; Code:
+
 (defun pm--derive-raw-name (key)
-  "Get a simplified string representation of a keyword symbol.
+  "Get a simplified string representation of keyword symbol KEY.
 
 For example, :USERNAME becomes \"USERNAME\"."
   (substring (symbol-name key) 1))
 
 (defun pm--user-property-p (key)
-  "Return true if keyword symbol KEY is a user-defined drawer
-property.
+  "Return non-nil if KEY represents a user-defined drawer property.
 
-We assume that such properties are exclusively defined as
-uppercase keyword symbols."
+Return NIL otherwise.
+
+KEY is a keyword symbol.  The assumption is that KEY is a
+user-defined drawer property if and only if it's all uppercase.
+
+We refer to a keyword symbol as a \"user-key\" whenever it
+represents a user-defined drawer property."
   (let ((raw-key-name (pm--derive-raw-name key)))
     (string= raw-key-name
              (upcase raw-key-name))))
@@ -36,8 +45,11 @@ drawer properties."
               (seq-filter #'keywordp properties)))
 
 (defun pm--extract-user-data (properties)
-  "Extract fields given by FIELDNAMES from ELEMENT, an Org
-element (as returned by `org-element-parse-buffer'.)"
+  "Extract user-defined drawer properties from PROPERTIES.
+
+PROPERTIES is a plist of the kind that should be the second
+element of an Org-element object, for example one returned by
+`org-element-parse-buffer'."
   (let ((user-keys (pm--filter-user-keys properties))
         (headline (plist-get properties :raw-value)))
     (cons headline
@@ -47,19 +59,24 @@ element (as returned by `org-element-parse-buffer'.)"
                                   user-keys)))))
 
 (defun pm--pretty-print-user-key (user-key)
-  "Create an aesthetic version of USER-KEY."
+  "Create an aesthetic version of USER-KEY.
+
+We refer to this aesthetic version as a \"pretty key\"."
   (replace-regexp-in-string "-" " " (capitalize (pm--derive-raw-name user-key))))
 
 (defun pm--canonicalize-pretty-key (pretty-key)
-  "Reverse pretty printing of USER-KEY."
+  "Convert PRETTY-KEY into the equivalent user key."
   (intern (concat ":" (replace-regexp-in-string " " "-" (upcase pretty-key)))))
 
 (defun pm-compile-data ()
-  "Compile an alist mapping headlines (which should be the names of
-the various services you use) to username and password data.
+  "Compile an alist mapping Org headlines to user-data.
 
-return the interactive command used for copying a username or
-password to the clipboard."
+This user-data takes the form of drawer properties.  Specifically,
+it's a plist mapping the property names to their values.
+
+Return an interactive command that is then used for copying some
+data to the clipboard (for example, a username or password,
+though theoretically this could be anything.)"
   (let* ((headline-tree (org-element-parse-buffer 'headline))
          (user-data (org-element-map headline-tree 'headline
                       (lambda (element)
@@ -90,3 +107,5 @@ clipboard."
 ;; Local Variables:
 ;; read-symbol-shorthands: (("pm-" . "password-manager-"))
 ;; End:
+
+;;; password-manager.el ends here
