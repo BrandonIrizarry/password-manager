@@ -100,6 +100,29 @@ clipboard."
         (message "Copied data to clipboard")
       (user-error "Drawer property missing"))))
 
+;;; Password generation goodies.
+
+(defun pm--shuffle-array (array)
+  "Shuffle an array ARRAY in place, using Fisher-Yates.
+
+Return the shuffled array."
+  (let ((len (length array)))
+    (dotimes (i (- len 2))
+      (let ((j (+ i (random (- len i)))))
+        (let ((tmp (aref array i)))
+          (aset array i (aref array j))
+          (aset array j tmp)))))
+  array)
+
+(defun pm-generate-password (len)
+  "Return a string of random characters of length LEN.
+
+For now, the set of characters is drawn from ASCII
+33 (exclamation point) to 126 (tilde)."
+  (let ((all-chars (number-sequence 33 126)))
+    (seq-take (pm--shuffle-array (apply #'string all-chars))
+              len)))
+
 (provide 'password-manager)
 
 ;; Local Variables:
