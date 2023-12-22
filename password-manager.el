@@ -1,6 +1,4 @@
-;;; password-manager.el --- Manage usernames and passwords using Org Mode
-
-;; -*- lexical-binding: t; -*-
+;;; password-manager.el --- Manage usernames and passwords using Org Mode -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;;
