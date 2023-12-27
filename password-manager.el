@@ -88,16 +88,25 @@ password to the clipboard."
         (user-error "Drawer property missing")))))
 
 (defun pm--set-username (user-data)
-  "Set username of service mentioned in USER-DATA."
+  "Set username of service mentioned in USER-DATA.
+
+Warn if existing username is to be overwritten."
   (let ((headline (completing-read "Service: " (mapcar #'car user-data) nil t))
         (username (read-string "Username: ")))
-    (save-excursion
-      (goto-char (point-min))
-      (search-forward headline nil t)
-      (org-set-property "username" username))))
+    (if (and (memq :USERNAME (assoc headline user-data))
+             (y-or-n-p "Username exists; overwrite? "))
+        (progn
+          (save-excursion
+            (goto-char (point-min))
+            (search-forward headline nil t)
+            (org-set-property "username" username))
+          (message "Username for '%s' set!" headline))
+      (user-error "Aborted setting username"))))
 
 (defun pm--set-password (user-data)
-  "Set password of service mentioned in USER-DATA."
+  "Set password of service mentioned in USER-DATA.
+
+Warn if existing password is to be overwritten."
   (let ((headline (completing-read "Service: " (mapcar #'car user-data) nil t)))
     (if (and (memq :PASSWORD (assoc headline user-data))
              (y-or-n-p "Password exists; overwrite? "))
