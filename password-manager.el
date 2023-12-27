@@ -87,21 +87,32 @@ password to the clipboard."
           (message "Copied data to clipboard")
         (user-error "Drawer property missing")))))
 
+(defun pm--jump-to-headline-and-do (headline fn &rest args)
+  "Navigate to HEADLINE and call FN there (passing ARGS)."
+  (save-excursion
+    (goto-char (point-min))
+    (search-forward headline nil t)
+    (apply fn args)))
+
 (defun pm--set-username (user-data)
   "Set username of service mentioned in USER-DATA.
 
 Warn if existing username is to be overwritten."
-  (let ((headline (completing-read "Service: " (mapcar #'car user-data) nil t))
-        (username (read-string "Username: ")))
-    (if (and (memq :USERNAME (assoc headline user-data))
-             (y-or-n-p "Username exists; overwrite? "))
-        (progn
-          (save-excursion
-            (goto-char (point-min))
-            (search-forward headline nil t)
-            (org-set-property "username" username))
-          (message "Username for '%s' set!" headline))
-      (user-error "Aborted setting username"))))
+  (let* ((headline (completing-read "Service: " (mapcar #'car user-data) nil t))
+         (username-p (memq :USERNAME (assoc headline user-data)))
+         (set-property (lambda (username)
+                         (org-set-property "username" username)
+                         (message "Username for '%s' set!" headline))))
+    ;; We need to scope USERNAME over this cond
+    (let (username)
+      (cond ((not username-p)
+        ;     (setq username (read-string "Username: "))
+             (pm--jump-to-headline-and-do headline set-property username))
+            ((and username-p
+                  (y-or-n-p "Username exists; overwrite? "))
+             (pm--jump-to-headline-and-do headline set-property username))
+            (t
+             (user-error "Aborted setting username"))))))
 
 (defun pm--set-password (user-data)
   "Set password of service mentioned in USER-DATA.
