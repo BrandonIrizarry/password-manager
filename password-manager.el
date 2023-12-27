@@ -90,10 +90,15 @@ We refer to this aesthetic version as a \"pretty key\"."
   (let ((headline (completing-read "Service: " (mapcar #'car user-data) nil t)))
     (if (and (memq :PASSWORD (assoc headline user-data))
              (y-or-n-p "Password exists; overwrite? "))
-        (save-excursion
-          (goto-char (point-min))
-          (search-forward headline nil t)
-          (org-set-property "password" (pm--generate-password 20))
+        (progn
+          (save-excursion
+            (goto-char (point-min))
+            (search-forward headline nil t)
+            (let ((new-password (let ((input (read-string "New password (leave blank for randomized password): ")))
+                                  (if (string-match-p (rx bos (* whitespace) eos) input)
+                                      (pm--generate-password 20)
+                                    input))))
+              (org-set-property "password" new-password)))
           (message "Password for '%s' set!" headline))
       (user-error "Aborted setting password"))))
 
