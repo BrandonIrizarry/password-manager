@@ -88,10 +88,14 @@ We refer to this aesthetic version as a \"pretty key\"."
 
 (defun pm--set-password (user-data)
   (let ((headline (completing-read "Service: " (mapcar #'car user-data) nil t)))
-    (save-excursion
-      (goto-char (point-min))
-      (search-forward headline nil t)
-      (org-set-property "password" (pm--generate-password 20)))))
+    (if (and (memq :PASSWORD (assoc headline user-data))
+             (y-or-n-p "Password exists; overwrite? "))
+        (save-excursion
+          (goto-char (point-min))
+          (search-forward headline nil t)
+          (org-set-property "password" (pm--generate-password 20))
+          (message "Password for '%s' set!" headline))
+      (user-error "Aborted setting password"))))
 
 (defun pm-do-action (fn)
   "Run an action FN on some user-data.
