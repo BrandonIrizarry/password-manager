@@ -48,7 +48,7 @@ existing Org Mode facilities.
 * Usage
 There is only one user-facing function: 'password-manager-do-action'.
 
-Users are free to bind this to any key they wish.
+This is currently not bound to any key.
 
 While in their Org document containing their credentials, the user can
 run this command, at which point they're prompted to select one of
@@ -56,10 +56,18 @@ run this command, at which point they're prompted to select one of
 the user is prompted to select from among the headlines in their
 document. Then, the logic proceeds according to the action selected.
 
-In particular, if a username or password is set for a particular
-headline, a warning about overriding that property is issued. In this
-sense, the properties =:username= and =:password:= have special
-status, which is of course the goal of this application.
+** Password Generation
+In particular, when setting a password, the user is offered a choice
+between setting a custom password, which the user must fill out. If
+the user leaves the corresponding field blank, a random, secure
+password is generated and supplied as the user's choice for the new
+password.
+
+** Overriding Existing Username and Password Fields
+If a username or password is to be set for a particular headline, a
+warning about overriding that property is issued. In this sense, the
+properties =:username= and =:password:= have special status, which is
+of course the goal of this application.
 
 * License Conditions
 You should have received a copy of the GNU General Public License
