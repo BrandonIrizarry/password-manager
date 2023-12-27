@@ -66,39 +66,49 @@ We refer to this aesthetic version as a \"pretty key\"."
   "Convert PRETTY-KEY into the equivalent user key."
   (intern (concat ":" (replace-regexp-in-string " " "-" (upcase pretty-key)))))
 
-(defun pm-compile-data ()
-  "Compile an alist mapping Org headlines to user-data.
+(defun pm--copy-user-property (user-data)
+  (let* ((name (completing-read "Service: " (mapcar #'car user-data) nil t))
+         (current-properties (cdr (assoc name user-data))))
+    (let ((field (pm--canonicalize-pretty-key
+                  (completing-read "Copy what: "
+                                   (mapcar #'pm--pretty-print-user-key
+                                           (pm--filter-user-keys current-properties))
+                                   nil t))))
+      (if (gui-set-selection 'CLIPBOARD (plist-get current-properties field))
+          (message "Copied data to clipboard")
+        (user-error "Drawer property missing")))))
+
+(defun pm--set-username (user-data)
+  (let ((headline (completing-read "Service: " (mapcar #'car user-data) nil t))
+        (username (read-string "Username: ")))
+    (save-excursion
+      (goto-char (point-min))
+      (search-forward headline nil t)
+      (org-set-property "username" username))))
+
+(defun pm--set-password (user-data)
+  (let ((headline (completing-read "Service: " (mapcar #'car user-data) nil t)))
+    (save-excursion
+      (goto-char (point-min))
+      (search-forward headline nil t)
+      (org-set-property "password" (pm--generate-password 20)))))
+
+(defun pm-do-action (fn)
+  "Run an action FN on some user-data.
 
 This user-data takes the form of drawer properties.  Specifically,
-it's a plist mapping the property names to their values.
-
-Return an interactive command that is then used for copying some
-data to the clipboard (for example, a username or password,
-though theoretically this could be anything.)"
-  (let* ((headline-tree (org-element-parse-buffer 'headline))
-         (user-data (org-element-map headline-tree 'headline
+it's a plist mapping the property names to their values."
+  (interactive
+   (let ((actions `(("Set username" . ,#'pm--set-username)
+                    ("Set password" . ,#'pm--set-password)
+                    ("Copy property to clipboard" . ,#'pm--copy-user-property))))
+     (list (cdr (assoc (completing-read "Do what: " actions) actions)))))
+  ;; Note that `org-element-map' uses an indent setting of 2.
+  (let* ((user-data (org-element-map (org-element-parse-buffer 'headline) 'headline
                       (lambda (element)
                         (pm--extract-user-data (cadr element))))))
-    (lambda ()
-      "Interactive command for copying a username or password to the
-clipboard."
-      (interactive)
-      (let* ((name (completing-read "Service: " (mapcar #'car user-data) nil t))
-             (current-properties (cdr (assoc name user-data))))
-        (let ((field (pm--canonicalize-pretty-key
-                      (completing-read "Copy what: "
-                                       (mapcar #'pm--pretty-print-user-key
-                                               (pm--filter-user-keys current-properties))
-                                       nil t))))
-          (gui-set-selection 'CLIPBOARD (plist-get current-properties field)))))))
+    (funcall fn user-data)))
 
-(defun pm-lookup ()
-  "The driver for looking up usernames and passwords."
-  (interactive)
-  (let ((result (call-interactively (pm-compile-data))))
-    (if result
-        (message "Copied data to clipboard")
-      (user-error "Drawer property missing"))))
 
 ;;; Password generation goodies.
 
@@ -114,7 +124,7 @@ Return the shuffled array."
           (aset array j tmp)))))
   array)
 
-(defun pm-generate-password (len)
+(defun pm--generate-password (len)
   "Return a string of random characters of length LEN.
 
 For now, the set of characters is drawn from ASCII
