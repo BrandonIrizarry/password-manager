@@ -1,0 +1,66 @@
+#+title: Password Manager
+#+author: Brandon C. Irizarry
+
+* Copyright
+Copyright (C) 2001-2023 Brandon C. Irizarry.
+
+See the end of the file for license conditions.
+
+* Introduction
+
+Password Manager is an Elisp library for managing usernames and
+passwords. The idea is that the user sets up an Org document, where
+headlines (for now, all level 1):
+
+1. bear text representing a given service;
+2. possess username, password, and other relevant fields as
+   properties;
+3. can contain elaborative text in their bodies.
+
+(Note: I don't vouch for any of the example [fake] passwords shown
+here being necessarily secure. 😀)
+
+#+begin_example
+* Hometown Electric Company
+:PROPERTIES:
+:username: Jane Doe
+:password: gazillionth_3Vug+E?~i.["tY7ApDU1)
+:END:
+
+This is my username and password information for my light bill.
+
+* FindOut Credit Card
+:PROPERTIES:
+:username: FullName
+:password: the_lazy_fox_jumped_over_the_MOON_12345
+:pin: 1111
+:END:
+
+My credit card information.
+#+end_example
+
+* A Note on Encryption
+Ideally, one would take the further step of encrypting this Org
+document. This application doesn't handle encryption; it only makes
+searching for and setting data easier, as it's built on top of
+existing Org Mode facilities.
+
+* Usage
+There is only one user-facing function: 'password-manager-do-action'.
+
+Users are free to bind this to any key they wish.
+
+While in their Org document containing their credentials, the user can
+run this command, at which point they're prompted to select one of
+"Set username", "Set password", or "Copy property to clipboard". Then,
+the user is prompted to select from among the headlines in their
+document. Then, the logic proceeds according to the action selected.
+
+In particular, if a username or password is set for a particular
+headline, a warning about overriding that property is issued. In this
+sense, the properties =:username= and =:password:= have special
+status, which is of course the goal of this application.
+
+* License Conditions
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
