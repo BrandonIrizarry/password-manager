@@ -5,10 +5,15 @@
 ;; The goal is to (more or less) implement a replacement (but not
 ;; necessarily a workalike) for the 'pass' program in pure Org Mode.
 ;;
+;; A notable difference from 'pass' is that this application doesn't
+;; have any Git integration.
+;;
 ;; The idea is that you write your username and password data as Org
 ;; data, and you can then later query a given service for the username
 ;; and password you have on file for it, without having to, for
 ;; example, manually highlight and copy the data.
+;;
+;; Setting usernames and passwords is also possible.
 
 (require 'org-element)
 
@@ -67,6 +72,10 @@ We refer to this aesthetic version as a \"pretty key\"."
   (intern (concat ":" (replace-regexp-in-string " " "-" (upcase pretty-key)))))
 
 (defun pm--copy-user-property (user-data)
+  "Query user for a property in USER-DATA, and copy to clipboard.
+
+This is what's used for copying, for example, a username or a
+password to the clipboard."
   (let* ((name (completing-read "Service: " (mapcar #'car user-data) nil t))
          (current-properties (cdr (assoc name user-data))))
     (let ((field (pm--canonicalize-pretty-key
@@ -79,6 +88,7 @@ We refer to this aesthetic version as a \"pretty key\"."
         (user-error "Drawer property missing")))))
 
 (defun pm--set-username (user-data)
+  "Set username of service mentioned in USER-DATA."
   (let ((headline (completing-read "Service: " (mapcar #'car user-data) nil t))
         (username (read-string "Username: ")))
     (save-excursion
@@ -87,6 +97,7 @@ We refer to this aesthetic version as a \"pretty key\"."
       (org-set-property "username" username))))
 
 (defun pm--set-password (user-data)
+  "Set password of service mentioned in USER-DATA."
   (let ((headline (completing-read "Service: " (mapcar #'car user-data) nil t)))
     (if (and (memq :PASSWORD (assoc headline user-data))
              (y-or-n-p "Password exists; overwrite? "))
@@ -105,8 +116,14 @@ We refer to this aesthetic version as a \"pretty key\"."
 (defun pm-do-action (fn)
   "Run an action FN on some user-data.
 
-This user-data takes the form of drawer properties.  Specifically,
-it's a plist mapping the property names to their values."
+This user-data is an alist mapping Org headlines to
+org-element-style plists that describe user-defined drawer
+properties.
+
+There are currently three available actions when called
+interactively: `pm--set-username', `pm--set-password', and
+`pm--copy-user-property'. The last one is mainly used for copying
+things like usernames and passwords to the X clipboard."
   (interactive
    (let ((actions `(("Set username" . ,#'pm--set-username)
                     ("Set password" . ,#'pm--set-password)
