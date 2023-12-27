@@ -100,19 +100,20 @@ password to the clipboard."
 Warn if existing username is to be overwritten."
   (let* ((headline (completing-read "Service: " (mapcar #'car user-data) nil t))
          (username-p (memq :USERNAME (assoc headline user-data)))
-         (set-property (lambda (username)
-                         (org-set-property "username" username)
+         (set-property (lambda ()
+                         ;; Use `org-set-property''s own
+                         ;; implementation to query the user for a
+                         ;; username, rather than passing in the
+                         ;; username as a parameter to this lambda.
+                         (org-set-property "username" nil)
                          (message "Username for '%s' set!" headline))))
-    ;; We need to scope USERNAME over this cond
-    (let (username)
-      (cond ((not username-p)
-        ;     (setq username (read-string "Username: "))
-             (pm--jump-to-headline-and-do headline set-property username))
-            ((and username-p
-                  (y-or-n-p "Username exists; overwrite? "))
-             (pm--jump-to-headline-and-do headline set-property username))
-            (t
-             (user-error "Aborted setting username"))))))
+    (cond ((not username-p)
+           (pm--jump-to-headline-and-do headline set-property))
+          ((and username-p
+                (y-or-n-p "Username exists; overwrite? "))
+           (pm--jump-to-headline-and-do headline set-property))
+          (t
+           (user-error "Aborted setting username")))))
 
 (defun pm--set-password (user-data)
   "Set password of service mentioned in USER-DATA.
