@@ -129,23 +129,17 @@ overwritten."
              set-username)))
 
 (defun pm--set-password (user-data)
-  "Set password of service mentioned in USER-DATA.
-
-Warn if existing password is to be overwritten."
-  (let ((headline (completing-read "Service: " (mapcar #'car user-data) nil t)))
-    (if (and (memq :PASSWORD (assoc headline user-data))
-             (y-or-n-p "Password exists; overwrite? "))
-        (progn
-          (save-excursion
-            (goto-char (point-min))
-            (search-forward headline nil t)
-            (let ((new-password (let ((input (read-string "New password (leave blank for randomized password): ")))
-                                  (if (string-match-p (rx bos (* whitespace) eos) input)
-                                      (pm--generate-password 20)
-                                    input))))
-              (org-set-property "password" new-password)))
-          (message "Password for '%s' set!" headline))
-      (user-error "Aborted setting password"))))
+  "Set \"password\" property for headline defined in USER-DATA."
+  (let ((set-password (lambda (headline)
+                        (let ((new-password (let ((input (read-string "New password (leave blank for randomized password): ")))
+                                              (if (string-match-p (rx bos (* whitespace) eos) input)
+                                                  (pm--generate-password 20)
+                                                input))))
+                          (org-set-property "password" new-password)
+                          (message "Password for '%s' set!" headline)))))
+    (funcall (pm--define-user-property-setter "password")
+             user-data
+             set-password)))
 
 (defun pm-do-action (fn)
   "Run an action FN on some user-data.
