@@ -87,33 +87,40 @@ password to the clipboard."
           (message "Copied data to clipboard")
         (user-error "Drawer property missing")))))
 
-(defun pm--jump-to-headline-and-do (headline fn &rest args)
-  "Navigate to HEADLINE and call FN there (passing ARGS)."
+(defun pm--jump-to-headline-and-do (fn headline &rest args)
+  "Navigate to HEADLINE and call FN there (passing ARGS).
+
+FN always takes HEADLINE as its first argument."
   (save-excursion
     (goto-char (point-min))
     (search-forward headline nil t)
-    (apply fn args)))
+    (apply fn headline args)))
+
+(defun pm--define-user-property-setter (property)
+  "Return a function that sets PROPERTY for a headline."
+  (let ((keyword (pm--canonicalize-pretty-key property)))
+    (lambda (user-data action &rest args)
+      (let* ((headline (completing-read "Service: " (mapcar #'car user-data) nil t))
+             (username-p (memq keyword (assoc headline user-data))))
+        (cond ((not username-p)
+               (apply #'pm--jump-to-headline-and-do action headline args))
+              ((and username-p
+                    (y-or-n-p "Username exists; overwrite? "))
+               (apply #'pm--jump-to-headline-and-do action headline args))
+              (t
+               (user-error "Aborted setting username")))))))
 
 (defun pm--set-username (user-data)
-  "Set username of service mentioned in USER-DATA.
-
-Warn if existing username is to be overwritten."
-  (let* ((headline (completing-read "Service: " (mapcar #'car user-data) nil t))
-         (username-p (memq :USERNAME (assoc headline user-data)))
-         (set-property (lambda ()
+  (let ((set-username  (lambda (headline)
                          ;; Use `org-set-property''s own
                          ;; implementation to query the user for a
                          ;; username, rather than passing in the
                          ;; username as a parameter to this lambda.
                          (org-set-property "username" nil)
                          (message "Username for '%s' set!" headline))))
-    (cond ((not username-p)
-           (pm--jump-to-headline-and-do headline set-property))
-          ((and username-p
-                (y-or-n-p "Username exists; overwrite? "))
-           (pm--jump-to-headline-and-do headline set-property))
-          (t
-           (user-error "Aborted setting username")))))
+    (funcall (pm--define-user-property-setter "username")
+             user-data
+             set-username)))
 
 (defun pm--set-password (user-data)
   "Set password of service mentioned in USER-DATA.
