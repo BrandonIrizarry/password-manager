@@ -90,14 +90,19 @@ password to the clipboard."
 (defun pm--jump-to-headline-and-do (fn headline &rest args)
   "Navigate to HEADLINE and call FN there (passing ARGS).
 
-FN always takes HEADLINE as its first argument."
+FN always takes HEADLINE as its first argument.
+
+Currently, the ARGS parameter is left unused."
   (save-excursion
     (goto-char (point-min))
     (search-forward headline nil t)
     (apply fn headline args)))
 
 (defun pm--define-user-property-setter (property)
-  "Return a function that sets PROPERTY for a headline."
+  "Return a function that sets PROPERTY for a headline.
+
+The function warns if an existing value of PROPERTY is to be
+overwritten."
   (let ((keyword (pm--canonicalize-pretty-key property)))
     (lambda (user-data action &rest args)
       (let* ((headline (completing-read "Service: " (mapcar #'car user-data) nil t))
@@ -111,6 +116,7 @@ FN always takes HEADLINE as its first argument."
                (user-error (format "Aborted setting property '%s'" property))))))))
 
 (defun pm--set-username (user-data)
+  "Set \"username\" property for headline defined in USER-DATA."
   (let ((set-username  (lambda (headline)
                          ;; Use `org-set-property''s own
                          ;; implementation to query the user for a
