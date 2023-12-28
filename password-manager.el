@@ -101,14 +101,14 @@ FN always takes HEADLINE as its first argument."
   (let ((keyword (pm--canonicalize-pretty-key property)))
     (lambda (user-data action &rest args)
       (let* ((headline (completing-read "Service: " (mapcar #'car user-data) nil t))
-             (username-p (memq keyword (assoc headline user-data))))
-        (cond ((not username-p)
+             (property-p (memq keyword (assoc headline user-data))))
+        (cond ((not property-p)
                (apply #'pm--jump-to-headline-and-do action headline args))
-              ((and username-p
-                    (y-or-n-p "Username exists; overwrite? "))
+              ((and property-p
+                    (y-or-n-p (format "Property '%s' exists; overwrite? " property)))
                (apply #'pm--jump-to-headline-and-do action headline args))
               (t
-               (user-error "Aborted setting username")))))))
+               (user-error (format "Aborted setting property '%s'" property))))))))
 
 (defun pm--set-username (user-data)
   (let ((set-username  (lambda (headline)
