@@ -87,6 +87,10 @@ password to the clipboard."
           (message "Copied data to clipboard")
         (user-error "Drawer property missing")))))
 
+;; Note: we could reimplement things such that HEADLINE is dynamically
+;; scoped here on in, so users of our API don't have to remember to
+;; pass HEADLINE, but can still assume it's available (for example, as
+;; *HEADLINE*).
 (defun pm--jump-to-headline-and-do (fn headline &rest args)
   "Navigate to HEADLINE and call FN there (passing ARGS).
 
