@@ -71,21 +71,24 @@ We refer to this aesthetic version as a \"pretty key\"."
   "Convert PRETTY-KEY into the equivalent user key."
   (intern (concat ":" (replace-regexp-in-string " " "-" (upcase pretty-key)))))
 
+(defun pm--get-headline-from-user (user-data)
+  "Helper function to get headline (service name) from user."
+  (completing-read "Service: " (mapcar #'car user-data) nil t))
+
 (defun pm--copy-user-property (user-data)
   "Query user for a property in USER-DATA, and copy to clipboard.
 
 This is what's used for copying, for example, a username or a
 password to the clipboard."
-  (let* ((name (completing-read "Service: " (mapcar #'car user-data) nil t))
-         (current-properties (cdr (assoc name user-data))))
-    (let ((field (pm--canonicalize-pretty-key
-                  (completing-read "Copy what: "
-                                   (mapcar #'pm--pretty-print-user-key
-                                           (pm--filter-user-keys current-properties))
-                                   nil t))))
-      (if (gui-set-selection 'CLIPBOARD (plist-get current-properties field))
-          (message "Copied data to clipboard")
-        (user-error "Drawer property missing")))))
+  (let* ((current-properties (cdr (assoc (pm--get-headline-from-user user-data)
+                                         user-data)))
+         (field (pm--canonicalize-pretty-key (completing-read "Copy what: "
+                                                              (mapcar #'pm--pretty-print-user-key
+                                                                      (pm--filter-user-keys current-properties))
+                                                              nil t))))
+    (if (gui-set-selection 'CLIPBOARD (plist-get current-properties field))
+        (message "Copied data to clipboard")
+      (user-error "Drawer property missing"))))
 
 ;; Note: we could reimplement things such that HEADLINE is dynamically
 ;; scoped here on in, so users of our API don't have to remember to
@@ -109,7 +112,7 @@ The function warns if an existing value of PROPERTY is to be
 overwritten."
   (let ((keyword (pm--canonicalize-pretty-key property)))
     (lambda (user-data action &rest args)
-      (let* ((headline (completing-read "Service: " (mapcar #'car user-data) nil t))
+      (let* ((headline (pm--get-headline-from-user user-data))
              (property-p (memq keyword (assoc headline user-data))))
         (cond ((not property-p)
                (apply #'pm--jump-to-headline-and-do action headline args))
