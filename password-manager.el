@@ -71,6 +71,13 @@ We refer to this aesthetic version as a \"pretty key\"."
   "Convert PRETTY-KEY into the equivalent user key."
   (intern (concat ":" (replace-regexp-in-string " " "-" (upcase pretty-key)))))
 
+;; FIXME: This particular call to `completing-read' should enforce an
+;; _exact_ match, regardless of which completion styles the user
+;; currently has configured. This is because services can potentially
+;; have confusingly similar names, and if some match occurs first in
+;; the completion choices that isn't the exact match, we don't want it
+;; selected accidentally by the user. Overwrite-confirmation helps
+;; mitigate this, but still.
 (defun pm--get-headline-from-user (user-data)
   "Helper function to get headline (service name) from user."
   (completing-read "Service: " (mapcar #'car user-data) nil t))
