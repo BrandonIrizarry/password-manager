@@ -155,6 +155,7 @@ overwritten."
              user-data
              set-password)))
 
+;;;###autoload
 (defun pm-do-action (fn)
   "Run an action FN on some user-data.
 
