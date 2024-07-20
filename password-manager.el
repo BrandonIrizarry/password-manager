@@ -97,7 +97,8 @@ When called interactively, SERVICE is prompted for from the user."
     (read-string "New username: ")))
   (save-excursion
     (pm--goto-headline service)
-    (org-set-property "username" username)))
+    (org-set-property "username" username)
+    (message "Username for '%s' set!" service)))
 
 ;;;###autoload
 (defun pm-set-password (service password)
@@ -115,7 +116,8 @@ If PASSWORD is nil, then a random password is generated."
 	     new-password))))
   (save-excursion
     (pm--goto-headline service)
-    (org-set-property "password" password)))
+    (org-set-property "password" password)
+    (message "Password for '%s' set!" service)))
 
 
 (provide 'password-manager)
