@@ -44,17 +44,25 @@ Return the shuffled array."
           (aset array j tmp)))))
   array)
 
-(cl-defun pm--generate-random-password (&optional (len 20))
+(cl-defun pm--generate-random-password (&optional blacklist-chars (len 20))
   "Return a string of random characters of length LEN.
 
 LEN defaults to 20.
 
-For now, the set of characters is drawn from ASCII
-33 (exclamation point) to 126 (tilde)."
-  ;; 1. Generate a string (array) consisting of all possible characters.
+If BLACKLIST-CHARS is nil, then the set of characters is drawn
+from ASCII 33 (exclamation point) to 126 (tilde). Otherwise,
+blacklist the chars found in BLACKLIST-CHARS from this range."
+  ;; 1. Generate a string (array) consisting of all possible
+  ;; characters, removing the blacklisted ones.
+  ;;
   ;; 2. Shuffle this array.
+  ;;
   ;; 3. Take the first LEN characters as the new password.
-  (let ((all-chars (number-sequence 33 126)))
+
+  ;; Note that if BLACKLIST-CHARS is nil, this falls through nicely:
+  ;; ALL-CHARS is set to the widest range of characters possible.
+  (let ((all-chars (seq-difference (number-sequence 33 126)
+				   blacklist-chars)))
     (seq-take (pm--shuffle-array (apply #'string all-chars))
               len)))
 
@@ -94,10 +102,13 @@ When called interactively, SERVICE is prompted for from the user."
 
 If PASSWORD is nil, then a random password is generated."
   (interactive
-   (list (completing-read "Service: " (pm--get-all-headline-titles))
-	 (let ((new-password (read-string "New password: ")))
+   (let ((new-service (completing-read "Service: " (pm--get-all-headline-titles)))
+	 (new-password (read-string "New password: ")))
+     (list new-service
 	   (if (string-blank-p new-password)
-	       (pm--generate-random-password)
+	       (if-let ((blacklist-chars (pm--get-property new-service :BLACKLIST)))
+		   (pm--generate-random-password blacklist-chars)
+		 (pm--generate-random-password))
 	     new-password))))
   (save-excursion
     (pm--goto-headline service)
