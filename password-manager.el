@@ -89,7 +89,7 @@ When called interactively, SERVICE is prompted for from the user."
     (pm--goto-headline service)
     (org-set-property "username" username)))
 
-(defun pm-set-password (service &optional password)
+(defun pm-set-password (service password)
   "Set SERVICE password, defined in the service's property drawer, to PASSWORD.
 
 If PASSWORD is nil, then a random password is generated."
