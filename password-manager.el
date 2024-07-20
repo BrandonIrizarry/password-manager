@@ -30,6 +30,35 @@ appears."
   (re-search-forward (rx-to-string `(seq bol "*" (+ space) ,headline)))
   (beginning-of-line))
 
+;; Password generation goodies.
+
+(defun pm--shuffle-array (array)
+  "Shuffle an array ARRAY in place, using Fisher-Yates.
+
+Return the shuffled array."
+  (let ((len (length array)))
+    (dotimes (i (- len 2))
+      (let ((j (+ i (random (- len i)))))
+        (let ((tmp (aref array i)))
+          (aset array i (aref array j))
+          (aset array j tmp)))))
+  array)
+
+(cl-defun pm--generate-random-password (&optional (len 20))
+  "Return a string of random characters of length LEN.
+
+LEN defaults to 20.
+
+For now, the set of characters is drawn from ASCII
+33 (exclamation point) to 126 (tilde)."
+  ;; 1. Generate a string (array) consisting of all possible characters.
+  ;; 2. Shuffle this array.
+  ;; 3. Take the first LEN characters as the new password.
+  (let ((all-chars (number-sequence 33 126)))
+    (seq-take (pm--shuffle-array (apply #'string all-chars))
+              len)))
+
+
 ;; Public functions
 
 (defun pm-copy-property-to-keyboard (service property)
@@ -59,6 +88,20 @@ When called interactively, SERVICE is prompted for from the user."
   (save-excursion
     (pm--goto-headline service)
     (org-set-property "username" username)))
+
+(defun pm-set-password (service &optional password)
+  "Set SERVICE password, defined in the service's property drawer, to PASSWORD.
+
+If PASSWORD is nil, then a random password is generated."
+  (interactive
+   (list (completing-read "Service: " (pm--get-all-headline-titles))
+	 (let ((new-password (read-string "New password: ")))
+	   (if (string-blank-p new-password)
+	       (pm--generate-random-password)
+	     new-password))))
+  (save-excursion
+    (pm--goto-headline service)
+    (org-set-property "password" password)))
 
 
 (provide 'password-manager)
