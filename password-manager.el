@@ -2,6 +2,7 @@
 
 (require 'org-element)
 
+;; Private functions
 
 (defun pm--get-property (headline property)
   "Get PROPERTY from property drawer beneath HEADLINE."
@@ -19,6 +20,8 @@
     (org-element-map tree 'headline
       (lambda (headline)
 	(org-element-property :title headline)))))
+
+;; Public functions
 
 (defun pm-copy-property-to-keyboard (service property)
   "Copy PROPERTY, filed in SERVICE's property drawer, to the system clipboard.
