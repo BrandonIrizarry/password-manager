@@ -48,6 +48,18 @@ from the user."
       (message "Copied data to clipboard")
     (user-error "Drawer property missing")))
 
+(defun pm-set-username (service username)
+  "Set SERVICE username, defined in the service's property drawer, to USERNAME.
+
+When called interactively, SERVICE is prompted for from the user."
+  (interactive
+   (list
+    (completing-read "Service: " (pm--get-all-headline-titles))
+    (read-string "New username: ")))
+  (save-excursion
+    (pm--goto-headline service)
+    (org-set-property "username" username)))
+
 
 (provide 'password-manager)
 
