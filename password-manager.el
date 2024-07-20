@@ -7,7 +7,7 @@
 (defun pm--get-property (headline property)
   "Get PROPERTY from property drawer beneath HEADLINE."
   (save-excursion
-    (pm--goto-headline)
+    (pm--goto-headline headline)
     (let ((drawer-properties (cadr (org-element-headline-parser))))
       (plist-get drawer-properties property))))
 
