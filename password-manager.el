@@ -83,7 +83,7 @@ from the user."
       (let ((readable (completing-read "Which property: " properties-readable-to-internal)))
 	(cdr (assoc readable properties-readable-to-internal))))))
   (if (gui-set-selection 'CLIPBOARD (pm--get-property service property))
-      (message "Copied data to clipboard")
+      (message "Copied data to clipboard!")
     (user-error "Drawer property missing")))
 
 ;;;###autoload
