@@ -7,9 +7,7 @@
 (defun pm--get-property (headline property)
   "Get PROPERTY from property drawer beneath HEADLINE."
   (save-excursion
-    (goto-char 1)
-    (re-search-forward (rx-to-string `(seq "*" (+ space) ,headline)))
-    (beginning-of-line)
+    (pm--goto-headline)
     (let ((drawer-properties (cadr (org-element-headline-parser))))
       (plist-get drawer-properties property))))
 
@@ -20,6 +18,17 @@
     (org-element-map tree 'headline
       (lambda (headline)
 	(org-element-property :title headline)))))
+
+(defun pm--goto-headline (headline)
+  "Move to the relevant HEADLINE.
+
+Headline text in this context is the name of a service.
+
+Point is placed at the beginning of the line where the headline
+appears."
+  (goto-char 1)
+  (re-search-forward (rx-to-string `(seq bol "*" (+ space) ,headline)))
+  (beginning-of-line))
 
 ;; Public functions
 
