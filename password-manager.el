@@ -70,7 +70,7 @@ blacklist the chars found in BLACKLIST-CHARS from this range."
 ;; Public functions
 
 ;;;###autoload
-(defun pm-copy-property-to-keyboard (service property)
+(defun pm-copy-property-to-clipboard (service property)
   "Copy PROPERTY, filed in SERVICE's property drawer, to the system clipboard.
 
 When called interactively, SERVICE and PROPERTY are prompted for
