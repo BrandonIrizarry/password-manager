@@ -106,7 +106,7 @@ When called interactively, SERVICE is prompted for from the user."
 If PASSWORD is nil, then a random password is generated."
   (interactive
    (let ((new-service (completing-read "Service: " (pm--get-all-headline-titles)))
-	 (new-password (read-string "New password: ")))
+	 (new-password (read-string "New password (leave blank for a random password of 20 characters): ")))
      (list new-service
 	   (if (string-blank-p new-password)
 	       (if-let ((blacklist-chars (pm--get-property new-service :BLACKLIST)))
