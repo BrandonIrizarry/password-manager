@@ -69,6 +69,7 @@ blacklist the chars found in BLACKLIST-CHARS from this range."
 
 ;; Public functions
 
+;;;###autoload
 (defun pm-copy-property-to-keyboard (service property)
   "Copy PROPERTY, filed in SERVICE's property drawer, to the system clipboard.
 
@@ -85,6 +86,7 @@ from the user."
       (message "Copied data to clipboard")
     (user-error "Drawer property missing")))
 
+;;;###autoload
 (defun pm-set-username (service username)
   "Set SERVICE username, defined in the service's property drawer, to USERNAME.
 
@@ -97,6 +99,7 @@ When called interactively, SERVICE is prompted for from the user."
     (pm--goto-headline service)
     (org-set-property "username" username)))
 
+;;;###autoload
 (defun pm-set-password (service password)
   "Set SERVICE password, defined in the service's property drawer, to PASSWORD.
 
