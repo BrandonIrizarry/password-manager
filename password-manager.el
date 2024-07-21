@@ -148,14 +148,16 @@ If PASSWORD is nil, then a random password is generated."
 		   (string-blank-p new-blacklist))
 	       nil
 	     new-blacklist))))
-  (save-excursion
-    (goto-char (point-max))
-    (newline)
-    (insert (format "* %s" service))
-    (org-set-property "username" username)
-    (org-set-property "password" password)
-    (when blacklist
-      (org-set-property "blacklist" blacklist))))
+  (let ((buffer-read-only nil))
+    (save-excursion
+      (goto-char (point-max))
+      (newline)
+      (insert (format "* %s" service))
+      (org-set-property "username" username)
+      (org-set-property "password" password)
+      (when blacklist
+	(org-set-property "blacklist" blacklist)))
+    (save-buffer)))
 
 
 (provide 'password-manager)
