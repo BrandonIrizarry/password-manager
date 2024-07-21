@@ -66,6 +66,20 @@ blacklist the chars found in BLACKLIST-CHARS from this range."
     (seq-take (pm--shuffle-array (apply #'string all-chars))
               len)))
 
+;; This function comes in handy, since our blacklist-chars can come
+;; from more than one source (currently either a property drawer, or
+;; else from user input.)
+(defun pm--process-new-password-entry (new-password &optional blacklist-chars)
+  "Generate a new password under certain conditions.
+
+If NEW-PASSWORD is not `string-blank-p' (neither blank nor
+empty), simply return the new password.
+
+Otherwise, return a randomly generated password using the given
+BLACKLIST-CHARS string."
+  (if (string-blank-p new-password)
+      (pm--generate-random-password blacklist-chars)
+    new-password))
 
 ;; Public functions
 
@@ -106,14 +120,11 @@ When called interactively, SERVICE is prompted for from the user."
 
 If PASSWORD is nil, then a random password is generated."
   (interactive
-   (let ((new-service (completing-read "Service: " (pm--get-all-headline-titles)))
-	 (new-password (read-string "New password (leave blank for a random password of 20 characters): ")))
+   (let* ((new-service (completing-read "Service: " (pm--get-all-headline-titles)))
+	  (new-password (read-string "New password (leave blank for a random password of 20 characters): "))
+	  (blacklist-chars (pm--get-property new-service :BLACKLIST)))
      (list new-service
-	   (if (string-blank-p new-password)
-	       (if-let ((blacklist-chars (pm--get-property new-service :BLACKLIST)))
-		   (pm--generate-random-password blacklist-chars)
-		 (pm--generate-random-password))
-	     new-password))))
+	   (pm--process-new-password-entry new-password blacklist-chars))))
   (save-excursion
     (pm--goto-headline service)
     (org-set-property "password" password)
