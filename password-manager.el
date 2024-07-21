@@ -130,6 +130,33 @@ If PASSWORD is nil, then a random password is generated."
     (org-set-property "password" password)
     (message "Password for '%s' set!" service)))
 
+(defun pm-add-full-entry (service username password blacklist)
+  "Add a fully populated username-password entry to the current Org buffer."
+  (interactive
+   (let* ((new-service (read-string "New service name: " ))
+	  (new-username (read-string "Username for this service: "))
+	  (new-password (read-string "New password (leave blank for a random password of 20 characters): "))
+	  ;; NEW-PASSWORD being blank implies that a random password
+	  ;; will be generated later. Hence, let's ask the user for
+	  ;; any blacklisted characters for their random passwords.
+	  (new-blacklist (when (string-blank-p new-password)
+			   (read-string "Enter any blacklisted chars for password generation (leave blank if you don't want this): "))))
+     (list new-service
+	   new-username
+	   (pm--process-new-password-entry new-password new-blacklist)
+	   (if (or (null new-blacklist)
+		   (string-blank-p new-blacklist))
+	       nil
+	     new-blacklist))))
+  (save-excursion
+    (goto-char (point-max))
+    (newline)
+    (insert (format "* %s" service))
+    (org-set-property "username" username)
+    (org-set-property "password" password)
+    (when blacklist
+      (org-set-property "blacklist" blacklist))))
+
 
 (provide 'password-manager)
 
