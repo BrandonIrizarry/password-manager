@@ -44,7 +44,7 @@ Return the shuffled array."
           (aset array j tmp)))))
   array)
 
-(cl-defun pm--generate-random-password (&optional blacklist-chars (len 20))
+(cl-defun pm--generate-random-password (blacklist-chars &optional (len 20))
   "Return a string of random characters of length LEN.
 
 LEN defaults to 20.
