@@ -69,7 +69,7 @@ blacklist the chars found in BLACKLIST-CHARS from this range."
 ;; This function comes in handy, since our blacklist-chars can come
 ;; from more than one source (currently either a property drawer, or
 ;; else from user input.)
-(defun pm--process-new-password-entry (new-password &optional blacklist-chars)
+(defun pm--process-new-password-entry (new-password blacklist-chars)
   "Generate a new password under certain conditions.
 
 If NEW-PASSWORD is not `string-blank-p' (neither blank nor
