@@ -1,0 +1,76 @@
+#+title: Password Manager
+#+author: Brandon C. Irizarry
+
+* Copyright
+Copyright (C) 2001-2023 Brandon C. Irizarry.
+
+See the end of the file for license conditions.
+
+* Introduction
+
+Password Manager is an Elisp library for managing usernames and
+passwords. These are recorded as level-one headlines with property
+drawers containing the relevant information. Examples:
+
+#+begin_example
+* Hometown Electric Company
+:PROPERTIES:
+:username: Jane Doe
+:password: gazillionth_3Vug+E?~i.["tY7ApDU1)
+:END:
+
+This is my username and password information for my light bill.
+
+* FindOut Credit Card
+:PROPERTIES:
+:username: FullName
+:password: the_lazy_fox_jumped_over_the_MOON_12345
+:pin: 1111
+:END:
+
+My credit card information.
+
+* TenderMoneyBuddy
+:PROPERTIES:
+:username: TheOneAndOnly
+:blacklist: abcdefghijklmnopqrstuvwxyz
+:password: SM<A~E+BRK{7;6.[I\N!
+:END:
+#+end_example
+
+* A Note on Encryption
+Passwords are normally encrypted. However, this library doesn't handle
+the encryption; it only makes searching for and setting data easier,
+as it's built on top of existing Org Mode facilities.
+
+* Usage
+There are currently three interactive entry-points, meant to be called
+by the user:
+
+1. password-manager-set-username
+   - Set the username property.
+     
+2. password-manager-set-password
+   - Set the password property.
+
+     There is an option to set a 20 character random password.
+3. password-manager-add-full-entry
+   - A shortcut to add a new entry to 
+
+These are currently not bound to any keys.
+
+** Password Generation
+When setting a password, the user is offered a choice between setting
+a custom password, which the user must fill out. If the user leaves
+the corresponding field blank, a random, secure password is generated
+and supplied as the user's choice for the new password.
+
+** Password-Character Blacklists
+Once in a while, a service won't let you use all possible printable
+ASCII when generating a random password. For this purpose, a user can
+add a 'blacklist' property to list characters that shouldn't be
+included in the generated password.
+
+* License Conditions
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
