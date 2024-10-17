@@ -84,21 +84,29 @@ BLACKLIST-CHARS string."
 ;; Public functions
 
 ;;;###autoload
-(defun pm-copy-property-to-clipboard (service property)
+(defun pm-copy-property-to-clipboard (service property properties-directory)
   "Copy PROPERTY, filed in SERVICE's property drawer, to the system clipboard.
 
 When called interactively, SERVICE and PROPERTY are prompted for
 from the user."
   (interactive
-   (let ((properties-readable-to-internal '(("username" . :USERNAME)
-					    ("password" . :PASSWORD))))
+   (let* ((tree (org-element-parse-buffer))
+          (properties-directory (org-element-map tree 'headline
+                                  (lambda (hl)
+                                    (list
+                                     (org-element-property :raw-value hl)
+                                     (org-element-property :USERNAME hl)
+                                     (org-element-property :PASSWORD hl)))))
+          (service (mapcar #'car properties-directory)))
      (list
-      (completing-read "Service: " (pm--get-all-headline-titles))
-      (let ((readable (completing-read "Which property: " properties-readable-to-internal)))
-	(cdr (assoc readable properties-readable-to-internal))))))
-  (if (gui-set-selection 'CLIPBOARD (pm--get-property service property))
-      (message "Copied data to clipboard!")
-    (user-error "Drawer property missing")))
+      (completing-read "Service: " service)
+      (completing-read "Which field: " (list "username" "password"))
+      properties-directory)))
+  (let* ((properties-entry (assoc service properties-directory))
+         (property-value (cond ((string= property "username") (nth 1 properties-entry))
+                               ((string= property "password") (nth 2 properties-entry))
+                               (t (user-error "Drawer property missing")))))
+    (gui-set-selection 'CLIPBOARD property-value)))
 
 ;;;###autoload
 (defun pm-set-username (service username)
