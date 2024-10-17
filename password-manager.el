@@ -3,6 +3,19 @@
 (require 'org-element)
 
 ;; Private functions
+;;
+;; We should at some point be able to refactor these (and the project
+;; in general) again, since our `pm-copy-property-to-clipboard'
+;; function now compiles an easy-to-work-with property directory,
+;; which should greatly simply things.
+;;
+;; The one challenge is to load the property directory only upon
+;; entering a certain buffer (e.g., a buffer that could be in a
+;; certain mode inherited from Org Mode, or else a buffer belonging to
+;; a certain list, as in project.el). We need a "buffer hook."
+;;
+;; Indeed, this library's methods should only be active when visiting
+;; certain buffers.
 
 (defun pm--get-property (headline property)
   "Get PROPERTY from property drawer beneath HEADLINE."
