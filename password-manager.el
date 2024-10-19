@@ -108,17 +108,16 @@ from the user."
                                   (lambda (hl)
                                     (list
                                      (org-element-property :raw-value hl)
-                                     (org-element-property :USERNAME hl)
-                                     (org-element-property :PASSWORD hl)))))
+                                     "username" (org-element-property :USERNAME hl)
+                                     "password" (org-element-property :PASSWORD hl)))))
           (service (mapcar #'car properties-directory)))
      (list
       (completing-read "Service: " service)
       (completing-read "Which field: " (list "username" "password"))
       properties-directory)))
-  (let* ((properties-entry (assoc service properties-directory))
-         (property-value (cond ((string= property "username") (nth 1 properties-entry))
-                               ((string= property "password") (nth 2 properties-entry))
-                               (t (user-error "Drawer property missing")))))
+  (let* ((properties-entry (cdr (assoc service properties-directory)))
+         (property-value (or (plist-get properties-entry property #'string-equal)
+                             (user-error "Drawer property '%s' missing for '%s'" property service))))
     (gui-set-selection 'CLIPBOARD property-value)))
 
 ;;;###autoload
