@@ -10,7 +10,9 @@ See the end of the file for license conditions.
 
 Password Manager is an Elisp library for managing usernames and
 passwords. These are recorded as level-one headlines with property
-drawers containing the relevant information. Examples:
+drawers containing the relevant information. The idea is to have a
+single encrypted file filled with these level-one headlines. An
+example ~passwords.org~ could look something like this:
 
 #+begin_example
 * Hometown Electric Company
@@ -38,6 +40,8 @@ My credit card information.
 :END:
 #+end_example
 
+Note how notes can be added underneath each Org entry as desired.
+
 * A Note on Encryption
 Passwords are normally encrypted. However, this library doesn't handle
 the encryption; it only makes searching for and setting data easier,
@@ -55,7 +59,7 @@ by the user:
 
      There is an option to set a 20 character random password.
 3. password-manager-add-full-entry
-   - A shortcut to add a new entry to 
+   - A shortcut to add a new entry to the user's password file.
 
 These are currently not bound to any keys.
 
